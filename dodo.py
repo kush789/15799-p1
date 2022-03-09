@@ -15,7 +15,10 @@ def task_project1_setup():
 def task_project1():
 
     def generate_actions_file(workload_csv):
-        print ("====================>>>>> workload_csv is ", workload_csv)
+        if workload_csv == "":
+            print ("====================>>>>> workload_csv is default!!")
+        else:
+            print ("====================>>>>> workload_csv is ", workload_csv)
         with open("actions.sql", "w") as fp:
             fp.write("SELECT 1;")
 
@@ -27,7 +30,9 @@ def task_project1():
         "actions": [(generate_actions_file,)],
         "params": [{
             "name": "workload_csv",
-            "long": "workload_csv"
+            "long": "workload_csv",
+            "default": "",
+
         }],
         # Always rerun this task.
         "uptodate": [False],
