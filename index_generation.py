@@ -63,7 +63,7 @@ def generate_create_index_commands(index_set):
 
     for table, indexes in index_set.items():
         for index in indexes:
-            create_index_command = "CREATE INDEX idx_%s_%s ON %s (%s)" % (
+            create_index_command = "CREATE INDEX idx_%s_%s ON %s (%s);" % (
                         table, 
                         "_".join(list(index)), 
                         table,
