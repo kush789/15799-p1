@@ -1,16 +1,27 @@
+from doit import task_params
+
+def task_project1_setup():
+
+    return {
+        "actions": [
+            'sudo apt-get update', 
+            'sudo apt-get -y install python3-pip', 
+            'sudo pip3 install pandas', 
+            'sudo pip3 install sqlparse', 
+            'sudo pip3 install sql-metadata'
+        ]
+    }
+
+@task_params([{"name": "workload_csv", "default": "", "type": str, "long": "workload_csv"}])
 def task_project1():
+
+    print ("====================>>>>> workload_csv is " + workload_csv)
+
     return {
         # A list of actions. This can be bash or Python callables.
         "actions": [
             'echo "Faking action generation."',
             'echo "SELECT 1;" > actions.sql',
-            'echo "CREATE INDEX idx_rating_uid ON review (u_id);" > actions.sql',
-            'echo "CREATE INDEX idx_rating_aid ON review (a_id);" >> actions.sql',
-            'echo "CREATE INDEX idx_rating_iid ON review (i_id);" >> actions.sql',
-            'echo "CREATE INDEX idx_review_rating_uid ON review_rating (u_id);" >> actions.sql',
-            'echo "CREATE INDEX idx_review_rating_aid ON review_rating (a_id);" >> actions.sql',
-            'echo "CREATE INDEX idx_trust_sid ON trust (source_u_id);" >> actions.sql',
-            'echo "CREATE INDEX idx_trust_tid ON trust (target_u_id);" >> actions.sql',
             'echo \'{"VACUUM": true}\' > config.json',
         ],
         # Always rerun this task.
