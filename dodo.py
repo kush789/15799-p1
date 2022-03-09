@@ -1,4 +1,4 @@
-from doit import task_params
+import json
 
 def task_project1_setup():
 
@@ -15,15 +15,21 @@ def task_project1_setup():
 @task_params([{"name": "workload_csv", "default": "", "type": str, "long": "workload_csv"}])
 def task_project1():
 
-    print ("====================>>>>> workload_csv is " + workload_csv)
+    def generate_actions_file(workload_csv):
+        print ("====================>>>>> workload_csv is ", workload_csv)
+        with open("actions.sql", "w") as fp:
+            fp.write("SELECT 1;")
+
+        with open("config.json", "w") as fp:
+            fp.write('{"VACUUM": true}')
 
     return {
         # A list of actions. This can be bash or Python callables.
-        "actions": [
-            'echo "Faking action generation."',
-            'echo "SELECT 1;" > actions.sql',
-            'echo \'{"VACUUM": true}\' > config.json',
-        ],
+        "actions": [(generate_actions_file,)],
+        "params": [{
+            "name": "workload_csv",
+            "long": "workload_csv"
+        }],
         # Always rerun this task.
         "uptodate": [False],
     }
