@@ -12,7 +12,6 @@ def task_project1_setup():
         ]
     }
 
-@task_params([{"name": "workload_csv", "default": "", "type": str, "long": "workload_csv"}])
 def task_project1():
 
     def generate_actions_file(workload_csv):
