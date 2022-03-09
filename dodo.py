@@ -27,7 +27,7 @@ def task_project1():
         from column_usage import parse_simple_logs
         from index_generation import generate_all_indexes, prune_indexes, generate_create_index_commands
 
-        log_file_dataframe = pd.read_csv(log_file_path, header = None)
+        log_file_dataframe = pd.read_csv(workload_csv, header = None)
         parsing_success, column_usage, where_predicates = parse_simple_logs(log_file_dataframe)
 
         print ("\n\n\n")
