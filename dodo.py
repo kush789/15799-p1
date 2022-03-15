@@ -66,11 +66,6 @@ def task_project1():
         print ("<<<<============== pruned_indexes ==============>>>>")
         pprint.pprint (index_commands)
         
-        print ("\n\n\n")
-        print ("<<<<============== curr_indices ==============>>>>")
-        pprint.pprint (curr_indices)
-
-
         with open("actions.sql", "w") as fp:
             for command in index_commands:
                 fp.write("%s\n" % (command))
