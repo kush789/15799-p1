@@ -1,14 +1,9 @@
 from collections import defaultdict
 
-def generate_all_indexes(operator_column_usage, where_predicates):
+def generate_all_indexes(where_predicates):
 
     index_set = defaultdict(lambda : set())
     
-    # TODO: This is broken; parsing doesn't give order by table information
-#     if "order_by" in operator_column_usage:
-#         for column, usage in sorted(operator_column_usage["order_by"].items(), key = lambda x : -x[1]):
-#             index_set.append([column])
-           
     for predicate, count in sorted(where_predicates.items(), key = lambda x : -x[1]):
 
         table_column_usage = defaultdict(lambda : [])

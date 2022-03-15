@@ -304,7 +304,7 @@ def parse_simple_logs(log_file_data):
         "skipped_log_type": defaultdict(lambda : 0)
     }
 
-    column_usage = defaultdict(lambda : defaultdict(lambda : 0))
+    # column_usage = defaultdict(lambda : defaultdict(lambda : 0))
     where_operator_usage = defaultdict(lambda : 0)
 
     print ("Total log lines: ", len(log_file_data))
@@ -345,24 +345,24 @@ def parse_simple_logs(log_file_data):
             if len(predicates):
                 where_operator_usage[predicates] += 1
             
-            parsed_query = Parser(query)
-            columns = parsed_query.columns_dict
+            # parsed_query = Parser(query)
+            # columns = parsed_query.columns_dict
 
             # Ignore pg system queries (touches any table that starts with "pq_")
-            if any(map(lambda x : x.startswith("pg_"), parsed_query.tables)):
-                continue
+            # if any(map(lambda x : x.startswith("pg_"), parsed_query.tables)):
+            #    continue
 
             # If only one table, prefix is not there; append
-            table_prefix = ""
-            if len(parsed_query.tables) == 1:
-                table_prefix = parsed_query.tables[0] + "."
+            # table_prefix = ""
+            # if len(parsed_query.tables) == 1:
+            #     table_prefix = parsed_query.tables[0] + "."
 
-            for operator_type in columns:
-                for column in columns[operator_type]:
-                    if "." in column:
-                        column_usage[operator_type][column] += 1
-                    else:
-                        column_usage[operator_type][table_prefix + column] += 1
+            # for operator_type in columns:
+            #     for column in columns[operator_type]:
+            #         if "." in column:
+            #             column_usage[operator_type][column] += 1
+            #         else:
+            #             column_usage[operator_type][table_prefix + column] += 1
 
             # Update counters
             parsing_success["success"] += 1
@@ -370,4 +370,5 @@ def parse_simple_logs(log_file_data):
         except Exception as e:
             parsing_success["failure"] += 1
 
-    return parsing_success, column_usage, where_operator_usage
+    # return parsing_success, column_usage, where_operator_usage
+    return parsing_success, where_operator_usage

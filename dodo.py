@@ -12,32 +12,7 @@ def task_project1_setup():
             'sudo pip3 install sqlparse', 
             'sudo pip3 install sql-metadata',
             'sudo pip3 install pprintpp',
-
-            # Figure out existing indexes without constraints
-            '''
-                echo "select idx.relname as index_name
-                        from pg_index pgi
-                        join pg_class idx on idx.oid = pgi.indexrelid
-                        join pg_namespace insp on insp.oid = idx.relnamespace
-                        join pg_class tbl on tbl.oid = pgi.indrelid
-                        join pg_namespace tnsp on tnsp.oid = tbl.relnamespace
-                        join pg_indexes pgis on pgis.indexname = idx.relname
-                        where not pgi.indisunique and 
-                              not pgi.indisprimary and 
-                              not pgi.indisexclusion 
-                              and tnsp.nspname = 'public';" \
-                | sudo -u postgres psql project1db  \
-                | tail -n +3 \
-                | head -n -2 \
-                | awk '{ print "DROP INDEX" $0 ";"}' \
-                > drop_existing_indices.sql
-            ''',
-
-            # Just for debug
-            'cat drop_existing_indices.sql',
-
-            # drop all existing indices without constraints
-            'cat drop_existing_indices.sql | sudo -u postgres psql project1db'
+            'sudo bash drop_existing_indices.sh',
         ],
         "verbosity": 2
     }
@@ -58,21 +33,17 @@ def task_project1():
             reader = csv.reader(csvfile, delimiter=',')
             log_file_data = list(map(lambda x : x[13], reader))
 
-        parsing_success, column_usage, where_predicates = parse_simple_logs(log_file_data)
+        parsing_success, where_predicates = parse_simple_logs(log_file_data)
 
         print ("\n\n\n")
         print ("<<<<============== parsing_success ==============>>>>")
         pprint.pprint (parsing_success)
 
         print ("\n\n\n")
-        print ("<<<<============== column_usage ==============>>>>")
-        pprint.pprint (column_usage)
-
-        print ("\n\n\n")
         print ("<<<<============== where_predicates ==============>>>>")
         pprint.pprint (where_predicates)
 
-        all_indexes = generate_all_indexes(column_usage, where_predicates)
+        all_indexes = generate_all_indexes(where_predicates)
         print ("\n\n\n")
         print ("<<<<============== all_indexes ==============>>>>")
         pprint.pprint (all_indexes)
@@ -88,7 +59,7 @@ def task_project1():
         pprint.pprint (index_commands)
         
         with open("actions.sql", "w") as fp:
-            for command in index_commands:
+            for command in index_commands[:4]:
                 fp.write("%s\n" % (command))
 
         with open("config.json", "w") as fp:
