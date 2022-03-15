@@ -56,7 +56,12 @@ def task_project1():
         print ("<<<<============== pruned_indexes ==============>>>>")
         pprint.pprint (pruned_indexes)
 
-        index_commands = generate_create_index_commands(pruned_indexes)
+        top_indexes = select_top_indexes(pruned_indexes)
+        print ("\n\n\n")
+        print ("<<<<============== top_indexes ==============>>>>")
+        pprint.pprint (top_indexes)
+
+        index_commands = generate_create_index_commands(top_indexes)
         print ("\n\n\n")
         print ("<<<<============== pruned_indexes ==============>>>>")
         pprint.pprint (index_commands)
