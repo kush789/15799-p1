@@ -3,7 +3,6 @@
 
 
 def task_project1_setup():
-
     return {
         "actions": [
             'sudo apt-get update', 
@@ -12,6 +11,8 @@ def task_project1_setup():
             'sudo pip3 install sqlparse', 
             'sudo pip3 install sql-metadata',
             'sudo pip3 install pprintpp',
+            'echo "SELECT tablename, indexname, indexdef FROM pg_indexes WHERE schemaname = \'public\';" | psql project1db > existing_indices.txt',
+            'cat existing_indices.txt'
         ],
         "verbosity": 2
     }
