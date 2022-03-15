@@ -1,25 +1,3 @@
-import subprocess
-
-generate_drop_indexes_sql_file = '''echo "select idx.relname as index_name
-    from pg_index pgi
-    join pg_class idx on idx.oid = pgi.indexrelid
-    join pg_namespace insp on insp.oid = idx.relnamespace
-    join pg_class tbl on tbl.oid = pgi.indrelid
-    join pg_namespace tnsp on tnsp.oid = tbl.relnamespace
-    join pg_indexes pgis on pgis.indexname = idx.relname
-    where not pgi.indisunique and 
-            not pgi.indisprimary and 
-            not pgi.indisexclusion 
-            and tnsp.nspname = 'public';" \
-    | sudo -u postgres psql project1db  \
-    | tail -n +3 \
-    | head -n -2 \
-    | awk '{ print "DROP INDEX" $0 ";"}' \
-    > drop_existing_indices.sql;
-'''
-
-drop_indices_command = 'cat drop_existing_indices.sql | sudo -u postgres psql project1db;'
-
 def task_project1_setup():
     return {
         "actions": [
@@ -44,20 +22,21 @@ def task_project1():
         import json
         import pprint
         import csv
-        import pandas as pd
 
         from column_usage import parse_simple_logs
         from index_generation import generate_all_indexes, prune_indexes, generate_create_index_commands
         
         with open(workload_csv) as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
-            log_file_data = list(map(lambda x : x[13], reader))
-
+            log_file_data = list(filter(lambda log: \
+                                        log.startswith("statement") and \
+                                        not log.startswith("statement: BEGIN") and \
+                                        not log.startswith("statement: COMMIT") and \
+                                        not log.startswith("statement: SHOW") and \
+                                        not log.startswith("statement: SET") and \
+                                        not log.startswith("statement: ALTER SYSTEM SET"),
+                                    map(lambda x : x[13], reader)))
         parsing_success, where_predicates = parse_simple_logs(log_file_data)
-
-
-        # subprocess.call('sudo ./drop_existing_indices.sh')
-
 
         print ("\n\n\n")
         print ("<<<<============== parsing_success ==============>>>>")
@@ -92,7 +71,6 @@ def task_project1():
     return {
         # A list of actions. This can be bash or Python callables.
         "actions": [
-            'sudo ./drop_existing_indices.sh',
             (generate_actions_file,)
         ],
         "params": [{
