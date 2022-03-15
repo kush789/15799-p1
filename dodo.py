@@ -15,6 +15,8 @@ def task_project1_setup():
         "verbosity": 2
     }
 
+curr_indices = []
+
 def task_project1():
 
     def generate_actions_file(workload_csv, timeout):
@@ -24,7 +26,7 @@ def task_project1():
         import csv
 
         from column_usage import parse_simple_logs
-        from index_generation import generate_all_indexes, prune_indexes, generate_create_index_commands
+        from index_generation import generate_all_indexes, prune_indexes, select_top_indexes, generate_create_index_commands
         
         with open(workload_csv) as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
@@ -66,6 +68,12 @@ def task_project1():
         print ("<<<<============== pruned_indexes ==============>>>>")
         pprint.pprint (index_commands)
         
+        curr_indices += index_commands
+        print ("\n\n\n")
+        print ("<<<<============== curr_indices ==============>>>>")
+        pprint.pprint (curr_indices)
+
+
         with open("actions.sql", "w") as fp:
             for command in index_commands:
                 fp.write("%s\n" % (command))
