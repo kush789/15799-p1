@@ -56,7 +56,8 @@ def task_project1():
         parsing_success, where_predicates = parse_simple_logs(log_file_data)
 
 
-        subprocess.call('sudo ./drop_existing_indices.sh')
+        # subprocess.call('sudo ./drop_existing_indices.sh')
+
 
         print ("\n\n\n")
         print ("<<<<============== parsing_success ==============>>>>")
@@ -90,7 +91,10 @@ def task_project1():
 
     return {
         # A list of actions. This can be bash or Python callables.
-        "actions": [(generate_actions_file,)],
+        "actions": [
+            'sudo ./drop_existing_indices.sh',
+            (generate_actions_file,)
+        ],
         "params": [{
             "name": "workload_csv",
             "long": "workload_csv",
