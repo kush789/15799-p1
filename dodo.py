@@ -15,8 +15,6 @@ def task_project1_setup():
         "verbosity": 2
     }
 
-curr_indices = []
-
 def task_project1():
 
     def generate_actions_file(workload_csv, timeout):
@@ -58,19 +56,17 @@ def task_project1():
         print ("<<<<============== pruned_indexes ==============>>>>")
         pprint.pprint (pruned_indexes)
 
-        top_indexes = select_top_indexes(pruned_indexes)
-        print ("\n\n\n")
-        print ("<<<<============== top_indexes ==============>>>>")
-        pprint.pprint (top_indexes)
+        top_indexes = pruned_indexes
+        # top_indexes = select_top_indexes(pruned_indexes)
+        # print ("\n\n\n")
+        # print ("<<<<============== top_indexes ==============>>>>")
+        # pprint.pprint (top_indexes)
 
         index_commands = generate_create_index_commands(top_indexes)
         print ("\n\n\n")
         print ("<<<<============== pruned_indexes ==============>>>>")
         pprint.pprint (index_commands)
         
-        global curr_indices
-        curr_indices += index_commands
-
         print ("\n\n\n")
         print ("<<<<============== curr_indices ==============>>>>")
         pprint.pprint (curr_indices)
