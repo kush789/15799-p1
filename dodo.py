@@ -68,7 +68,9 @@ def task_project1():
         print ("<<<<============== pruned_indexes ==============>>>>")
         pprint.pprint (index_commands)
         
+        global curr_indices
         curr_indices += index_commands
+
         print ("\n\n\n")
         print ("<<<<============== curr_indices ==============>>>>")
         pprint.pprint (curr_indices)
