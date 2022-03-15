@@ -11,7 +11,15 @@ def task_project1_setup():
             'sudo pip3 install sqlparse', 
             'sudo pip3 install sql-metadata',
             'sudo pip3 install pprintpp',
-            'echo "SELECT tablename, indexname, indexdef FROM pg_indexes WHERE schemaname = \'public\';" | sudo -u postgres psql project1db > existing_indices.txt',
+            '''
+                echo "select idx.relname as index_name
+                from pg_index pgi
+                join pg_class idx on idx.oid = pgi.indexrelid
+                join pg_namespace insp on insp.oid = idx.relnamespace
+                join pg_class tbl on tbl.oid = pgi.indrelid
+                join pg_namespace tnsp on tnsp.oid = tbl.relnamespace
+                where not pgi.indisunique and not pgi.indisprimary and not pgi.indisexclusion and tnsp.nspname = 'public';" | sudo -u postgres psql project1db > existing_indices.txt
+            ''',
             'cat existing_indices.txt'
         ],
         "verbosity": 2
