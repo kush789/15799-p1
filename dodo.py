@@ -84,7 +84,7 @@ def task_project1():
         pprint.pprint (index_commands)
         
         with open("actions.sql", "w") as fp:
-            for command in index_commands[:4]:
+            for command in index_commands:
                 fp.write("%s\n" % (command))
 
         with open("config.json", "w") as fp:
