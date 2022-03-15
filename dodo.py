@@ -5,9 +5,10 @@
 def task_project1_setup():
     return {
         "actions": [
+
+            # Env setup actions
             'sudo apt-get update', 
             'sudo apt-get -y install python3-pip', 
-            'sudo pip3 install pandas', 
             'sudo pip3 install sqlparse', 
             'sudo pip3 install sql-metadata',
             'sudo pip3 install pprintpp',
@@ -47,13 +48,17 @@ def task_project1():
 
         import json
         import pprint
+        import csv
         import pandas as pd
 
         from column_usage import parse_simple_logs
         from index_generation import generate_all_indexes, prune_indexes, generate_create_index_commands
+        
+        with open(workload_csv) as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            log_file_data = list(map(lambda x : x[13], reader))
 
-        log_file_dataframe = pd.read_csv(workload_csv, header = None)
-        parsing_success, column_usage, where_predicates = parse_simple_logs(log_file_dataframe)
+        parsing_success, column_usage, where_predicates = parse_simple_logs(log_file_data)
 
         print ("\n\n\n")
         print ("<<<<============== parsing_success ==============>>>>")

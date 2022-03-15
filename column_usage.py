@@ -289,7 +289,7 @@ def get_where_predicates_from_query(query):
 
 
 
-def parse_simple_logs(log_file_dataframe):
+def parse_simple_logs(log_file_data):
 
     simple_log_prefix = "statement: "
     simple_log_prefix_len = len(simple_log_prefix)
@@ -307,11 +307,11 @@ def parse_simple_logs(log_file_dataframe):
     column_usage = defaultdict(lambda : defaultdict(lambda : 0))
     where_operator_usage = defaultdict(lambda : 0)
 
-    print ("Total log lines: ", len(log_file_dataframe))
+    print ("Total log lines: ", len(log_file_data))
 
     # Parse each log line
     log_count = 0
-    for log in log_file_dataframe[13].values:
+    for log in log_file_data:
         log_count += 1
 
         if log_count % 10000 == 0:
