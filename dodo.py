@@ -1,6 +1,25 @@
+import subprocess
 
+generate_drop_indexes_sql_file = '''
+    echo "select idx.relname as index_name
+            from pg_index pgi
+            join pg_class idx on idx.oid = pgi.indexrelid
+            join pg_namespace insp on insp.oid = idx.relnamespace
+            join pg_class tbl on tbl.oid = pgi.indrelid
+            join pg_namespace tnsp on tnsp.oid = tbl.relnamespace
+            join pg_indexes pgis on pgis.indexname = idx.relname
+            where not pgi.indisunique and 
+                    not pgi.indisprimary and 
+                    not pgi.indisexclusion 
+                    and tnsp.nspname = 'public';" \
+    | sudo -u postgres psql project1db  \
+    | tail -n +3 \
+    | head -n -2 \
+    | awk '{ print "DROP INDEX" $0 ";"}' \
+    > drop_existing_indices.sql;
+'''
 
-
+drop_indices_command = 'cat drop_existing_indices.sql | sudo -u postgres psql project1db;'
 
 def task_project1_setup():
     return {
@@ -14,30 +33,13 @@ def task_project1_setup():
             'sudo pip3 install pprintpp',
 
             # Figure out existing indexes without constraints
-            '''
-            echo "select idx.relname as index_name
-                    from pg_index pgi
-                    join pg_class idx on idx.oid = pgi.indexrelid
-                    join pg_namespace insp on insp.oid = idx.relnamespace
-                    join pg_class tbl on tbl.oid = pgi.indrelid
-                    join pg_namespace tnsp on tnsp.oid = tbl.relnamespace
-                    join pg_indexes pgis on pgis.indexname = idx.relname
-                    where not pgi.indisunique and 
-                            not pgi.indisprimary and 
-                            not pgi.indisexclusion 
-                            and tnsp.nspname = 'public';" \
-            | sudo -u postgres psql project1db  \
-            | tail -n +3 \
-            | head -n -2 \
-            | awk '{ print "DROP INDEX" $0 ";"}' \
-            > drop_existing_indices.sql;
-            ''',
+            generate_drop_indexes_sql_file,
 
             # Just for debug
             'cat drop_existing_indices.sql;',
 
             # drop all existing indices without constraints
-            'cat drop_existing_indices.sql | sudo -u postgres psql project1db;',
+            drop_indices_command,
         ],
         "verbosity": 2
     }
@@ -59,6 +61,11 @@ def task_project1():
             log_file_data = list(map(lambda x : x[13], reader))
 
         parsing_success, where_predicates = parse_simple_logs(log_file_data)
+
+
+        subprocess.call(generate_drop_indexes_sql_file)
+        subprocess.call('cat drop_existing_indices.sql')
+        subprocess.call(drop_indices_command)
 
         print ("\n\n\n")
         print ("<<<<============== parsing_success ==============>>>>")
