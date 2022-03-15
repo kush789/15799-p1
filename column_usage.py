@@ -5,25 +5,26 @@ from collections import defaultdict
 from sql_metadata import Parser
 import pprint
 
+
 def get_column_usage_from_logs(log_file_dataframe):
 
-    valid_log_types = { "SELECT": True, "UPDATE": True }
+    valid_log_types = {"SELECT": True, "UPDATE": True}
     execute_unnamed_start_token = "execute <unnamed>:"
     execute_unnamed_start_token_len = len(execute_unnamed_start_token)
     transaction_regex = r"(execute S_[0-9]+: )(.*)"
 
     # Maintain parsing counters
-    parsing_success = { 
+    parsing_success = {
         "success": 0,
-        "success_log_type": defaultdict(lambda : 0),
+        "success_log_type": defaultdict(lambda: 0),
         "failure": 0,
         "skipped": 0,
-        "skipped_log_type": defaultdict(lambda : 0)
+        "skipped_log_type": defaultdict(lambda: 0),
     }
 
-    column_usage = defaultdict(lambda : defaultdict(lambda : 0))
+    column_usage = defaultdict(lambda: defaultdict(lambda: 0))
 
-    print ("Total log lines: ", len(log_file_dataframe))
+    print("Total log lines: ", len(log_file_dataframe))
 
     # Parse each log line
     log_count = 0
@@ -31,9 +32,9 @@ def get_column_usage_from_logs(log_file_dataframe):
         log_count += 1
 
         if log_count % 10000 == 0:
-            print ("Processed log_count: ", log_count)
+            print("Processed log_count: ", log_count)
             pprint.pprint(parsing_success)
-            print ("\n\n")
+            print("\n\n")
 
         # Ignore queries from log that are [ BEGIN, COMMIT ]
         if log_type not in valid_log_types:
@@ -57,7 +58,7 @@ def get_column_usage_from_logs(log_file_dataframe):
             parsed_query = Parser(query)
             columns = parsed_query.columns_dict
             # Ignore pg system queries (touches any table that starts with "pq_")
-            if any(map(lambda x : x.startswith("pg_"), parsed_query.tables)):
+            if any(map(lambda x: x.startswith("pg_"), parsed_query.tables)):
                 continue
 
             # If only one table, prefix is not there; append
@@ -73,30 +74,30 @@ def get_column_usage_from_logs(log_file_dataframe):
                         column_usage[operator_type][table_prefix + column] += 1
         except Exception as e:
             parsing_success["failure"] += 1
-        
 
     return parsing_success, column_usage
 
+
 def get_where_usage(log_file_dataframe):
 
-    valid_log_types = { "SELECT": True, "UPDATE": True }
+    valid_log_types = {"SELECT": True, "UPDATE": True}
     execute_unnamed_start_token = "execute <unnamed>:"
     execute_unnamed_start_token_len = len(execute_unnamed_start_token)
     transaction_regex = r"(execute S_[0-9]+: )(.*)"
 
     # Maintain parsing counters
-    parsing_success = { 
+    parsing_success = {
         "success": 0,
-        "success_log_type": defaultdict(lambda : 0),
+        "success_log_type": defaultdict(lambda: 0),
         "failure": 0,
         "skipped": 0,
-        "skipped_log_type": defaultdict(lambda : 0)
+        "skipped_log_type": defaultdict(lambda: 0),
     }
 
-    column_usage = defaultdict(lambda : defaultdict(lambda : 0))
-    where_operator_usage = defaultdict(lambda : 0)
+    column_usage = defaultdict(lambda: defaultdict(lambda: 0))
+    where_operator_usage = defaultdict(lambda: 0)
 
-    print ("Total log lines: ", len(log_file_dataframe))
+    print("Total log lines: ", len(log_file_dataframe))
 
     # Parse each log line
     log_count = 0
@@ -104,9 +105,9 @@ def get_where_usage(log_file_dataframe):
         log_count += 1
 
         if log_count % 10000 == 0:
-            print ("Processed log_count: ", log_count)
+            print("Processed log_count: ", log_count)
             pprint.pprint(parsing_success)
-            print ("\n\n")
+            print("\n\n")
 
         # Ignore queries from log that are [ BEGIN, COMMIT ]
         if log_type not in valid_log_types:
@@ -123,7 +124,7 @@ def get_where_usage(log_file_dataframe):
             query = re.sub(transaction_regex, r"\2", log)
 
         try:
-            
+
             statements = sqlparse.parse(query)
 
             """ {'r': 'review', 't': 'trust'} """
@@ -131,16 +132,15 @@ def get_where_usage(log_file_dataframe):
             table_aliases = parsed_query.tables_aliases
             columns = parsed_query.columns_dict
             # Ignore pg system queries (touches any table that starts with "pq_")
-            if any(map(lambda x : x.startswith("pg_"), parsed_query.tables)):
+            if any(map(lambda x: x.startswith("pg_"), parsed_query.tables)):
                 continue
 
             for token in statements[0]:
                 """
-                    token type examples:
-                        - sqlparse.sql.Where
-                        - sqlparse.sql.From
+                token type examples:
+                    - sqlparse.sql.Where
+                    - sqlparse.sql.From
                 """
-
 
                 """ Ignore non where clauses """
                 if type(token) != sqlparse.sql.Where:
@@ -171,13 +171,13 @@ def get_where_usage(log_file_dataframe):
                         r.u_id -> review.u_id
                     """
                     left_full, right_full = left, right
-                    
+
                     for alias, table_name in table_aliases.items():
                         if left.startswith(alias + "."):
                             left_full = table_name + "." + left.split(".")[1]
                         if right is not None and right.startswith(alias + "."):
                             right_full = table_name + "." + right.split(".")[1]
-                            
+
                     """
                         If there is only one table, prefix it as is to column
                     """
@@ -191,32 +191,14 @@ def get_where_usage(log_file_dataframe):
 
         except Exception as e:
             parsing_success["failure"] += 1
-        
 
     return parsing_success, column_usage, where_operator_usage
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def get_where_predicates_from_query(query):
 
     predicates = []
-    
+
     statements = sqlparse.parse(query)
 
     """ {'r': 'review', 't': 'trust'} """
@@ -224,18 +206,17 @@ def get_where_predicates_from_query(query):
     table_aliases = parsed_query.tables_aliases
     columns = parsed_query.columns_dict
     tables = parsed_query.tables
-    
+
     # Ignore pg system queries (touches any table that starts with "pq_")
-    if any(map(lambda x : x.startswith("pg_"), tables)):
+    if any(map(lambda x: x.startswith("pg_"), tables)):
         return predicates
 
     for token in statements[0]:
         """
-            token type examples:
-                - sqlparse.sql.Where
-                - sqlparse.sql.From
+        token type examples:
+            - sqlparse.sql.Where
+            - sqlparse.sql.From
         """
-
 
         """ Ignore non where clauses """
         if type(token) != sqlparse.sql.Where:
@@ -282,11 +263,10 @@ def get_where_predicates_from_query(query):
                     left_full = parsed_query.tables[0] + "." + left_full
                 if right_full is not None and "." not in right_full:
                     right_full = parsed_query.tables[0] + "." + right_full
-            
+
             predicates.append((left_full, right_full))
 
     return predicates
-
 
 
 def parse_simple_logs(log_file_data):
@@ -295,19 +275,19 @@ def parse_simple_logs(log_file_data):
     simple_log_prefix_len = len(simple_log_prefix)
 
     # Maintain parsing counters
-    parsing_success = { 
+    parsing_success = {
         "success": 0,
-        "success_log_type": defaultdict(lambda : 0),
+        "success_log_type": defaultdict(lambda: 0),
         "failure": 0,
-        "failure_reason": defaultdict(lambda : 0),
+        "failure_reason": defaultdict(lambda: 0),
         "skipped": 0,
-        "skipped_log_type": defaultdict(lambda : 0)
+        "skipped_log_type": defaultdict(lambda: 0),
     }
 
     # column_usage = defaultdict(lambda : defaultdict(lambda : 0))
-    where_operator_usage = defaultdict(lambda : 0)
+    where_operator_usage = defaultdict(lambda: 0)
 
-    print ("Total log lines: ", len(log_file_data))
+    print("Total log lines: ", len(log_file_data))
 
     # Parse each log line
     log_count = 0
@@ -315,19 +295,20 @@ def parse_simple_logs(log_file_data):
         log_count += 1
 
         if log_count % 10000 == 0:
-            print ("Processed log_count: ", log_count)
+            print("Processed log_count: ", log_count)
             pprint.pprint(parsing_success)
-            print ("\n\n")
+            print("\n\n")
 
             continue
 
-
         # Ignore logs that are not statements
-        if not log.startswith("statement") or \
-        log.startswith("statement: BEGIN") or \
-        log.startswith("statement: COMMIT") or \
-        log.startswith("statement: SHOW") or \
-        log.startswith("statement: SET"):
+        if (
+            not log.startswith("statement")
+            or log.startswith("statement: BEGIN")
+            or log.startswith("statement: COMMIT")
+            or log.startswith("statement: SHOW")
+            or log.startswith("statement: SET")
+        ):
             # Update counters
             parsing_success["skipped"] += 1
             continue
@@ -336,7 +317,7 @@ def parse_simple_logs(log_file_data):
 
         # Empty statements
         if len(query) < 5:
-            parsing_success["skipped"] += 1        
+            parsing_success["skipped"] += 1
             continue
 
         try:
@@ -344,7 +325,7 @@ def parse_simple_logs(log_file_data):
             predicates = tuple(get_where_predicates_from_query(query))
             if len(predicates):
                 where_operator_usage[predicates] += 1
-            
+
             # parsed_query = Parser(query)
             # columns = parsed_query.columns_dict
 
