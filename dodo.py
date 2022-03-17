@@ -2,13 +2,13 @@ def task_project1_setup():
     return {
         "actions": [
             # Env setup actions
-            "sudo apt-get update",
-            "sudo apt-get -y install python3-pip",
-            "sudo pip3 install sqlparse",
-            "sudo pip3 install sql-metadata",
-            "sudo pip3 install pprintpp",
+            "apt-get update",
+            "apt-get -y install python3-pip",
+            "pip3 install sqlparse",
+            "pip3 install sql-metadata",
+            "pip3 install pprintpp",
             # Figure out existing indexes without constraints
-            "sudo ./drop_existing_indices.sh",
+            "./drop_existing_indices.sh",
         ],
         "verbosity": 2,
     }

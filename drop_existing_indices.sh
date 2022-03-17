@@ -23,3 +23,5 @@ cat drop_existing_indices.sql;
 
 # drop all existing indices without constraints
 cat drop_existing_indices.sql | sudo -u postgres psql project1db;
+
+cat configure_system.sql | sudo -u postgres psql project1db;
